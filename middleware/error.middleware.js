@@ -4,7 +4,7 @@ const errorHandler = (err, req, res, next) => {
   let errMsg = err.message || "Something Went Wrong";
   res.status(errorStatus).json({
     status: errorStatus,
-    message: errMsg,
+    error_message: errMsg,
     stack: process.env.NODE_ENV === "development" ? err.stack : [],
   });
 };
