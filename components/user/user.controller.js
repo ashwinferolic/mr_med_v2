@@ -1,6 +1,8 @@
 const { comparePassword } = require("../../utils/password");
 const { generateToken } = require("../../utils/token");
 const createError = require("http-errors");
+const { transporter } = require("../../utils/mail");
+const moment = require("moment");
 const {
   existsUserService,
   registerUserService,
@@ -10,6 +12,8 @@ const {
   findUserByIdService,
   editUserService,
   deleteUserByIdService,
+  resetPasswordService,
+  findLoggedInUserService,
 } = require("./user.service");
 
 // register user
@@ -60,7 +64,7 @@ const loginUser = async (req, res, next) => {
   try {
     let user = await findUserByEmailService(req, res, next);
     if (user && (await comparePassword(req.body.password, user.password))) {
-      let token = generateToken(user.userName, user.email);
+      let token = generateToken(user._id, user.email);
       let data = {
         user,
         token,
@@ -133,6 +137,92 @@ const deleteUserById = async (req, res, next) => {
   }
 };
 
+// reset password
+const resetPassword = async (req, res, next) => {
+  try {
+    let user = await resetPasswordService(req, res, next);
+    if (user) {
+      return res
+        .status(200)
+        .json({ message: "Password have been updated", user });
+    } else {
+      next(
+        createError(
+          404,
+          "email and mobileNumber does not match /api/users/reset-password"
+        )
+      );
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Send Pin
+const SendPin = async (req, res, next) => {
+  try {
+    const user = await findUserByEmailService(req, res, next);
+    if (user) {
+      let code = Math.floor(1000 + Math.random() * 9000);
+      user.pin = {
+        code,
+        willExpire: moment(),
+      };
+      await user.save();
+      // nodemailer
+      let mailData = {
+        from: process.env.MAIL,
+        to: user.email,
+        subject: "password reset",
+        html: `Hi there, <br /> your secret code is ${code}`,
+      };
+
+      transporter.sendMail(mailData, async (err, info) => {
+        if (info) {
+          let data = {
+            info: info.envelope,
+            code,
+          };
+
+          return res.status(200).json({
+            message: "Email have been sent",
+            data,
+          });
+        }
+        if (err) {
+          next(createError(400, err));
+        }
+      });
+      // nodemailer ends
+    } else {
+      next(createError(404, "user does not exists"));
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
+// verify pin
+const verifyPin = async (req, res, next) => {
+  try {
+    const user = await findLoggedInUserService(req, res, next);
+    if (user) {
+      let currentTime = moment().utc(); // using utc because of mongoose atlas
+      let willExpire = moment(user.pin.willExpire);
+      let minutes = currentTime.diff(willExpire, "minutes");
+      if (minutes <= 2 && user.pin.code === req.body.code) {
+        user.pin = {};
+        await user.save();
+        return res.status(200).json({ message: "Pin Code Matches" });
+      } else {
+        next(createError(400, "Invalid pin or pin expired"));
+      }
+    }
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   registerUser,
   getUsersList,
@@ -142,4 +232,7 @@ module.exports = {
   getUserById,
   editUserById,
   deleteUserById,
+  resetPassword,
+  SendPin,
+  verifyPin,
 };

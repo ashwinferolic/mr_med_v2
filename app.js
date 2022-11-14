@@ -6,6 +6,7 @@ const { connectDB } = require("./utils/db");
 const { protected } = require("./utils/token");
 const app = express();
 const { errorHandler } = require("./middleware/error.middleware");
+const moment = require("moment");
 connectDB();
 
 // middlewares
@@ -15,6 +16,7 @@ app.use(logger("dev"));
 
 // routes
 app.use("/api/users", require("./components/user/user.route"));
+
 app.get("/dashboard", protected, (req, res) => {
   res.send("Your secret key is batman");
 });

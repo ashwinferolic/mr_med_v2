@@ -113,6 +113,47 @@ const deleteUserByIdService = async (req, res, next) => {
   }
 };
 
+// reset password
+const resetPasswordService = async (req, res, next) => {
+  try {
+    const hashedPassword = await hashPassword(req.body.password);
+    let user = await User.findOneAndUpdate(
+      {
+        $and: [
+          { email: req.body.email },
+          { mobileNumber: req.body.mobileNumber },
+        ],
+      },
+      {
+        $set: {
+          password: hashedPassword,
+        },
+      },
+      { new: true }
+    );
+    return user;
+  } catch (error) {
+    next(error);
+  }
+};
+
+// find login user service
+const findLoggedInUserService = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user.id);
+    return user;
+  } catch (error) {
+    next(error);
+  }
+};
+
+const sendMailService = async (req, res, next) => {
+  try {
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   existsUserService,
   registerUserService,
@@ -122,4 +163,6 @@ module.exports = {
   findUserByIdService,
   editUserService,
   deleteUserByIdService,
+  resetPasswordService,
+  findLoggedInUserService,
 };

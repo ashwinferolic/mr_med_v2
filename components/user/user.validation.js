@@ -39,4 +39,26 @@ const userSchema = Joi.object({
   }),
 });
 
-module.exports = { userSchema, loginUserSchena, registerUserSchema };
+const resetPasswordSchema = Joi.object({
+  email: Joi.string().required(),
+  mobileNumber: Joi.string().required(),
+  password: Joi.string().required(),
+  confirmPassword: Joi.string().valid(Joi.ref("password")).required(),
+});
+
+const sendPINSchema = Joi.object({
+  email: Joi.string().required(),
+});
+
+const verifyPINSchema = Joi.object({
+  code: Joi.string().required(),
+});
+
+module.exports = {
+  userSchema,
+  loginUserSchena,
+  registerUserSchema,
+  resetPasswordSchema,
+  sendPINSchema,
+  verifyPINSchema,
+};
