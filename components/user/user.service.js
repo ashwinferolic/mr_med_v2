@@ -22,7 +22,6 @@ const registerUserService = async (req, res, next) => {
       email: req.body.email,
       mobileNumber: req.body.mobileNumber,
       password: hashedPassword,
-      role: req.body.role,
       address: req.body.address,
     });
     return data;
@@ -89,7 +88,6 @@ const editUserService = async (req, res, next) => {
       {
         $set: {
           userName: req.body.userName,
-          role: req.body.role,
           email: req.body.email,
           password: req.body.password,
           mobileNumber: req.body.mobileNumber,
@@ -142,13 +140,6 @@ const findLoggedInUserService = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
     return user;
-  } catch (error) {
-    next(error);
-  }
-};
-
-const sendMailService = async (req, res, next) => {
-  try {
   } catch (error) {
     next(error);
   }

@@ -64,7 +64,7 @@ const loginUser = async (req, res, next) => {
   try {
     let user = await findUserByEmailService(req, res, next);
     if (user && (await comparePassword(req.body.password, user.password))) {
-      let token = generateToken(user._id, user.email);
+      let token = generateToken(user._id, user.email, user.role);
       let data = {
         user,
         token,

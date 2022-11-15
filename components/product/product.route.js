@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const { getJsonData, uploadFile } = require("../../utils/upload");
-const { validate } = require("../../middleware/joi.middleware");
+const { validate, validateList } = require("../../middleware/joi.middleware");
 const {
   addProductSchema,
   productSchema,
   validateProductList,
+  productDataSchema,
 } = require("./product.validation");
 const {
   addProduct,
@@ -30,7 +31,7 @@ router.post(
   "/bulk-upload",
   uploadFile.single("data"),
   getJsonData,
-  validateProductList,
+  validateList(productDataSchema),
   uploadProducts
 );
 router.get("/export-data", exportProducts);

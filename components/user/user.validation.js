@@ -3,7 +3,6 @@ const Joi = require("joi");
 const registerUserSchema = Joi.object({
   userName: Joi.string().required(),
   email: Joi.string().required(),
-  role: Joi.string().valid("admin", "customer", "staff"),
   mobileNumber: Joi.string()
     .pattern(new RegExp(/^[7-9][0-9]{9}$/))
     .length(10)
@@ -26,7 +25,6 @@ const loginUserSchena = Joi.object({
 const userSchema = Joi.object({
   userName: Joi.string(),
   email: Joi.string(),
-  role: Joi.string().valid("admin", "customer", "staff"),
   mobileNumber: Joi.string()
     .pattern(new RegExp(/^[7-9][0-9]{9}$/))
     .length(10),
